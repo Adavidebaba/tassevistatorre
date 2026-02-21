@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="it">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard Fiscale — Confronto Scenari Gestione Immobiliare 2026</title>
+  <meta name="description"
+    content="Dashboard comparativa tra 3 scenari di gestione immobiliare ad uso turistico: Mandato PM, Sublocazione e Market Standard." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+
+<body>
+
+  <div class="dashboard-container">
+
+    <!-- ─── Header ─────────────────────────────────────────────── -->
+    <header class="dashboard-header">
+      <h1>🏠 Dashboard Fiscale Immobiliare 2026</h1>
+      <p class="subtitle">Confronto scenari: Madre (Proprietaria) + Figlio (Gestore PM) — Affitti Turistici</p>
+    </header>
+
+    <!-- ─── Parametri di Input ─────────────────────────────────── -->
+    <section class="glass-card" id="controls-section">
+      <h2>⚙️ Parametri di Simulazione</h2>
+      <div class="controls-grid">
+        <div class="control-group">
+          <label for="input-incasso">Incasso Lordo Annuo (€)</label>
+          <input type="number" id="input-incasso" value="120000" min="0" step="1000" />
+        </div>
+        <div class="control-group">
+          <label for="input-spese">Spese Vive Annue (€)</label>
+          <input type="number" id="input-spese" value="70000" min="0" step="500" />
+        </div>
+        <div class="control-group">
+          <label for="input-netto-madre">Netto Madre Desiderato (€) <small style="opacity:0.6">— vuoto = calcolo
+              standard</small></label>
+          <input type="number" id="input-netto-madre" value="12000" placeholder="Es. 60000" min="0" step="1000" />
+        </div>
+        <div class="control-group">
+          <label for="input-pct-pm1">% Compenso PM (Scenario 1)</label>
+          <input type="range" id="input-pct-pm1" value="70" min="0" max="100" step="1" />
+          <span class="value-display" id="pct-pm1-value">70%</span>
+        </div>
+        <div class="control-group">
+          <label for="input-canone">Canone Sublocazione (€, Scenario 2)</label>
+          <input type="number" id="input-canone" value="30000" min="0" step="1000" />
+        </div>
+        <div class="control-group">
+          <label for="input-pct-pm3">% Compenso PM (Scenario 3)</label>
+          <input type="range" id="input-pct-pm3" value="25" min="0" max="100" step="1" />
+          <span class="value-display" id="pct-pm3-value">25%</span>
+        </div>
+        <div class="control-group">
+          <label for="input-pct-pm4">% Compenso PM (Scenario 4)</label>
+          <input type="range" id="input-pct-pm4" value="25" min="0" max="100" step="1" />
+          <span class="value-display" id="pct-pm4-value">25%</span>
+        </div>
+        <div class="control-group">
+          <label for="input-aliquota-forf">Aliquota Forfettario</label>
+          <select id="input-aliquota-forf">
+            <option value="5">5% (Start-up)</option>
+            <option value="15" selected>15% (Ordinario)</option>
+          </select>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── Summary Bar ────────────────────────────────────────── -->
+    <div class="summary-bar" id="summary-bar"></div>
+
+    <!-- ─── Scenario Cards ─────────────────────────────────────── -->
+    <div class="scenarios-grid" id="scenari-container"></div>
+
+    <!-- ─── Grafico Break-Even ─────────────────────────────────── -->
+    <section class="glass-card">
+      <h2>📈 Analisi Break-Even: IRPEF vs Cedolare Secca</h2>
+      <div class="chart-container">
+        <canvas id="breakeven-canvas"></canvas>
+      </div>
+      <div class="breakeven-info" id="breakeven-info"></div>
+    </section>
+
+  </div>
+
+  <!-- Scripts (ordine: dipendenze prima) -->
+  <script src="js/reverse-calculator.js"></script>
+  <script src="js/tax-engine.js"></script>
+  <script src="js/breakeven-calculator.js"></script>
+  <script src="js/tooltip-definitions.js"></script>
+  <script src="js/tooltip-manager.js"></script>
+  <script src="js/dashboard-renderer.js"></script>
+  <script src="js/app.js"></script>
+</body>
+
+</html>
