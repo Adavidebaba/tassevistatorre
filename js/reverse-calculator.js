@@ -1,26 +1,27 @@
 /**
  * reverse-calculator.js
- * Calcolo inverso: dato un "Netto Madre Desiderato",
+ * Calcolo inverso: dato un "Netto Proprietaria Desiderato",
  * determina compenso PM o canone necessario in ogni scenario.
  */
 
 class ReverseCalculator {
 
     /**
-     * Scenario 1 (IRPEF Madre):
-     * nettoMadre = imponibile - irpef(imponibile)
-     * → trova imponibile, poi compensoPM = incassoLordo - speseVive - imponibile
+     * Scenario 1 (SRL — IRES + IRAP + Dividendi):
+     * nettoDividendo = imponibile × fattoreNetto
+     * → imponibile = nettoTarget / fattoreNetto
+     * → compensoPM = incassoLordo - speseVive - imponibile
      */
-    static calcolaCompensoPmScenario1(nettoTarget, incassoLordo, speseVive, irpefCalc) {
-        const imponibile = ReverseCalculator.invertiIrpef(nettoTarget, irpefCalc);
+    static calcolaCompensoPmScenario1(nettoTarget, incassoLordo, speseVive, srlCalc) {
+        const imponibile = Math.round((nettoTarget / srlCalc.fattoreNetto()) * 100) / 100;
         const compensoPm = incassoLordo - speseVive - imponibile;
         return Math.max(0, Math.round(compensoPm * 100) / 100);
     }
 
     /**
      * Scenario 2 (Cedolare Secca 21% su canone):
-     * nettoMadre = canone × (1 - 0.21) = canone × 0.79
-     * → canone = nettoMadre / 0.79
+     * nettoProprietaria = canone × (1 - 0.21) = canone × 0.79
+     * → canone = nettoProprietaria / 0.79
      */
     static calcolaCanoneScenario2(nettoTarget) {
         const canone = nettoTarget / 0.79;
@@ -28,26 +29,30 @@ class ReverseCalculator {
     }
 
     /**
-     * Scenario 3 (Cedolare Secca 21% su incasso lordo):
-     * nettoMadre = incassoLordo - compensoPM - speseVive - (incassoLordo × 0.21)
-     *            = incassoLordo × 0.79 - speseVive - compensoPM
-     * → compensoPM = incassoLordo × 0.79 - speseVive - nettoMadre
+     * Scenario 3 (Cedolare Secca 21% su incasso con IVA):
+     * incassoConIva = incassoLordo × (1 + ivaIncasso)
+     * speseConIva = speseVive × (1 + ivaSpese)
+     * nettoProprietaria = incassoConIva - compensoPM - speseConIva - (incassoConIva × 0.21)
+     *            = incassoConIva × 0.79 - speseConIva - compensoPM
+     * → compensoPM = incassoConIva × 0.79 - speseConIva - nettoProprietaria
      */
-    static calcolaCompensoPmScenario3(nettoTarget, incassoLordo, speseVive) {
-        const compensoPm = incassoLordo * 0.79 - speseVive - nettoTarget;
+    static calcolaCompensoPmScenario3(nettoTarget, incassoLordo, speseVive, ivaIncasso = 0.10, ivaSpese = 0.22) {
+        const incassoConIva = Math.round(incassoLordo * (1 + ivaIncasso) * 100) / 100;
+        const speseConIva = Math.round(speseVive * (1 + ivaSpese) * 100) / 100;
+        const compensoPm = incassoConIva * 0.79 - speseConIva - nettoTarget;
         return Math.max(0, Math.round(compensoPm * 100) / 100);
     }
 
     /**
-     * Scenario 4 (IRPEF Madre su lordo × 95%, NO deduzioni reali):
-     * tasseMadre = irpef(incassoLordo × 0.95)  ← fisso, non dipende da PM
-     * nettoMadre = incassoLordo - compensoPM - speseVive - tasseMadre
-     * → compensoPM = incassoLordo - speseVive - tasseMadre - nettoMadre
+     * Scenario 4 (IRPEF Proprietaria su lordo × 95%, NO deduzioni reali):
+     * tasseProprietaria = irpef(incassoLordo × 0.95)  ← fisso, non dipende da PM
+     * nettoProprietaria = incassoLordo - compensoPM - speseVive - tasseProprietaria
+     * → compensoPM = incassoLordo - speseVive - tasseProprietaria - nettoProprietaria
      */
     static calcolaCompensoPmScenario4(nettoTarget, incassoLordo, speseVive, irpefCalc) {
         const baseImponibile = incassoLordo * 0.95;
-        const tasseMadre = irpefCalc.calcola(baseImponibile);
-        const compensoPm = incassoLordo - speseVive - tasseMadre - nettoTarget;
+        const tasseProprietaria = irpefCalc.calcola(baseImponibile);
+        const compensoPm = incassoLordo - speseVive - tasseProprietaria - nettoTarget;
         return Math.max(0, Math.round(compensoPm * 100) / 100);
     }
 

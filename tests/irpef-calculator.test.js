@@ -44,7 +44,7 @@ describe('IrpefCalculator', () => {
         expect(calc.calcola(80000)).toBe(27040);
     });
 
-    it('calcola correttamente imponibile 31753.85 (caso netto madre 24000)', () => {
+    it('calcola correttamente imponibile 31753.85 (caso netto proprietaria 24000)', () => {
         // 28000×23% = 6440
         // 3753.85×35% = 1313.8475 → arrotondato 1313.85
         // Totale = 7753.85

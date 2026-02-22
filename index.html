@@ -20,7 +20,7 @@
     <!-- ─── Header ─────────────────────────────────────────────── -->
     <header class="dashboard-header">
       <h1>🏠 Dashboard Fiscale Immobiliare 2026</h1>
-      <p class="subtitle">Confronto scenari: Madre (Proprietaria) + Figlio (Gestore PM) — Affitti Turistici</p>
+      <p class="subtitle">Confronto scenari: Proprietaria + Affittuario (Gestore PM) — Affitti Turistici</p>
     </header>
 
     <!-- ─── Parametri di Input ─────────────────────────────────── -->
@@ -28,17 +28,19 @@
       <h2>⚙️ Parametri di Simulazione</h2>
       <div class="controls-grid">
         <div class="control-group">
-          <label for="input-incasso">Incasso Lordo Annuo (€)</label>
+          <label for="input-incasso">Incasso Lordo Annuo (€, IVA esclusa)</label>
           <input type="number" id="input-incasso" value="120000" min="0" step="1000" />
         </div>
         <div class="control-group">
-          <label for="input-spese">Spese Vive Annue (€)</label>
+          <label for="input-spese">Spese Vive Annue (€, IVA esclusa)</label>
           <input type="number" id="input-spese" value="70000" min="0" step="500" />
         </div>
         <div class="control-group">
-          <label for="input-netto-madre">Netto Madre Desiderato (€) <small style="opacity:0.6">— vuoto = calcolo
+          <label for="input-netto-proprietaria">Netto Proprietaria Desiderato (€) <small style="opacity:0.6">— vuoto =
+              calcolo
               standard</small></label>
-          <input type="number" id="input-netto-madre" value="12000" placeholder="Es. 60000" min="0" step="1000" />
+          <input type="number" id="input-netto-proprietaria" value="12000" placeholder="Es. 60000" min="0"
+            step="1000" />
         </div>
         <div class="control-group">
           <label for="input-pct-pm1">% Compenso PM (Scenario 1)</label>
@@ -77,7 +79,7 @@
 
     <!-- ─── Grafico Break-Even ─────────────────────────────────── -->
     <section class="glass-card">
-      <h2>📈 Analisi Break-Even: IRPEF vs Cedolare Secca</h2>
+      <h2>📈 Confronto Tasse Famiglia — 4 Scenari</h2>
       <div class="chart-container">
         <canvas id="breakeven-canvas"></canvas>
       </div>
@@ -93,6 +95,7 @@
   <script src="js/tooltip-definitions.js"></script>
   <script src="js/tooltip-manager.js"></script>
   <script src="js/dashboard-renderer.js"></script>
+  <script src="js/chart-renderer.js"></script>
   <script src="js/app.js"></script>
 </body>
 

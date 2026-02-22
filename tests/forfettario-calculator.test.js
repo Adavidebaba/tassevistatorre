@@ -24,7 +24,7 @@ describe('ForfettarioCalculator', () => {
         expect(calc.calcolaInps(100000)).toBe(22420.2);
     });
 
-    describe('calcolaTotale con ricavi = 73246.15 (scenario 1, netto madre 24000)', () => {
+    describe('calcolaTotale con ricavi = 73246.15 (scenario 1, netto proprietaria 24000)', () => {
         let result;
 
         beforeEach(() => {
@@ -52,7 +52,7 @@ describe('ForfettarioCalculator', () => {
         });
     });
 
-    describe('calcolaTotale con ricavi = 55800 (scenario 3, netto madre 24000)', () => {
+    describe('calcolaTotale con ricavi = 55800 (scenario 3, netto proprietaria 24000)', () => {
         let result;
 
         beforeEach(() => {

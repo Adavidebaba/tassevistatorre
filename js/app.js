@@ -9,7 +9,7 @@ class DashboardApp {
         this.inputs = {
             incassoLordo: document.getElementById('input-incasso'),
             speseVive: document.getElementById('input-spese'),
-            nettoMadre: document.getElementById('input-netto-madre'),
+            nettoProprietaria: document.getElementById('input-netto-proprietaria'),
             pctPmScenario1: document.getElementById('input-pct-pm1'),
             canoneSublocazione: document.getElementById('input-canone'),
             pctPmScenario3: document.getElementById('input-pct-pm3'),
@@ -24,7 +24,7 @@ class DashboardApp {
         };
 
         this.renderer = new DashboardRenderer('scenari-container');
-        this.chart = new BreakevenChart('breakeven-canvas');
+        this.chart = new ScenariChart('breakeven-canvas');
 
         this.collegaEventi();
         this.aggiorna();
@@ -39,13 +39,17 @@ class DashboardApp {
     }
 
     leggiParametri() {
-        const nettoMadreRaw = this.inputs.nettoMadre.value.trim();
+        const nettoProprietariaRaw = this.inputs.nettoProprietaria.value.trim();
+        const parse = (input, fallback) => {
+            const v = parseFloat(input.value);
+            return Number.isNaN(v) ? fallback : v;
+        };
         return {
-            incassoLordo: parseFloat(this.inputs.incassoLordo.value) || 120000,
-            speseVive: parseFloat(this.inputs.speseVive.value) || 15000,
-            nettoMadreTarget: nettoMadreRaw !== '' ? parseFloat(nettoMadreRaw) : null,
+            incassoLordo: parse(this.inputs.incassoLordo, 120000),
+            speseVive: parse(this.inputs.speseVive, 15000),
+            nettoProprietariaTarget: nettoProprietariaRaw !== '' ? parseFloat(nettoProprietariaRaw) : null,
             percentualePmScenario1: parseFloat(this.inputs.pctPmScenario1.value) / 100,
-            canoneSublocazione: parseFloat(this.inputs.canoneSublocazione.value) || 30000,
+            canoneSublocazione: parse(this.inputs.canoneSublocazione, 30000),
             percentualePmScenario3: parseFloat(this.inputs.pctPmScenario3.value) / 100,
             percentualePmScenario4: parseFloat(this.inputs.pctPmScenario4.value) / 100,
             aliquotaForfettario: parseFloat(this.inputs.aliquotaForfettario.value) / 100,
@@ -61,7 +65,7 @@ class DashboardApp {
     }
 
     aggiornaDisplays(params) {
-        const isInverso = !!params.nettoMadreTarget;
+        const isInverso = !!params.nettoProprietariaTarget;
 
         this.inputs.pctPmScenario1.disabled = isInverso;
         this.inputs.canoneSublocazione.disabled = isInverso;
@@ -109,17 +113,13 @@ class DashboardApp {
         });
 
         const dati = bkCalc.generaDatiGrafico(0.01);
-        const breakevenPct = bkCalc.trovaBreakeven();
-
-        this.chart.disegna(dati, breakevenPct);
+        this.chart.disegna(dati);
 
         const infoEl = document.getElementById('breakeven-info');
-        if (breakevenPct !== null) {
-            infoEl.innerHTML = `Il punto di break-even è al <strong>${breakevenPct.toFixed(1)}%</strong> di compenso PM. ` +
-                `Sopra questa soglia, l'IRPEF ordinaria per la madre diventa più conveniente della Cedolare Secca.`;
-        } else {
-            infoEl.innerHTML = `Con i parametri attuali, la Cedolare Secca rimane sempre più conveniente.`;
-        }
+        const pctCorrente = params.percentualePmScenario1 || 0.70;
+        const migliore = bkCalc.trovaMigliore(pctCorrente);
+        infoEl.innerHTML = `Al ${Math.round(pctCorrente * 100)}% di compenso PM, lo scenario con meno tasse è ` +
+            `<strong>${migliore.nome}</strong> (${this.euro(migliore.tasse)} di tasse famiglia).`;
     }
 
     aggiornaSummary() {

@@ -1,7 +1,7 @@
 /**
  * breakeven-calculator.js
- * Calcola il punto di break-even: la % di compenso al figlio
- * al quale l'IRPEF della madre diventa più vantaggiosa della Cedolare Secca.
+ * Calcola le tasse totali famiglia per tutti e 4 gli scenari
+ * al variare della % di compenso PM all'affittuario.
  */
 
 class BreakevenCalculator {
@@ -11,43 +11,68 @@ class BreakevenCalculator {
         this.aliquotaForfettario = params.aliquotaForfettario || 0.05;
         this.coeffRedditivita = 0.86;
         this.aliquotaInps = 0.2607;
+        this.ivaIncasso = 0.10;
+        this.ivaSpese = 0.22;
 
+        this.srl = new SrlCalculator();
         this.irpef = new IrpefCalculator();
         this.cedolare = new CedolareCalculator(0.21);
     }
 
+    calcolaTasseForfettario(compensoPm) {
+        const imponibile = compensoPm * this.coeffRedditivita;
+        const imposta = imponibile * this.aliquotaForfettario;
+        const inps = imponibile * this.aliquotaInps;
+        return imposta + inps;
+    }
+
+    calcolaScenario1(pct) {
+        const compensoPm = this.incassoLordo * pct;
+        const imponibileSrl = Math.max(0, this.incassoLordo - compensoPm - this.speseVive);
+        const srl = this.srl.calcola(imponibileSrl);
+        return srl.tasseTotali + this.calcolaTasseForfettario(compensoPm);
+    }
+
+    calcolaScenario2(pct) {
+        const canone = this.incassoLordo * pct;
+        const incassoConIva = this.incassoLordo * (1 + this.ivaIncasso);
+        const speseConIva = this.speseVive * (1 + this.ivaSpese);
+        const tasseProprietaria = canone * 0.21;
+        const imponibileAff = Math.max(0, incassoConIva - canone - speseConIva);
+        const tasseAffIrpef = this.irpef.calcola(imponibileAff);
+        const inpsAff = Math.round(imponibileAff * this.aliquotaInps * 100) / 100;
+        return tasseProprietaria + tasseAffIrpef + inpsAff;
+    }
+
+    calcolaScenario3(pct) {
+        const compensoPm = this.incassoLordo * pct;
+        const incassoConIva = this.incassoLordo * (1 + this.ivaIncasso);
+        const tasseProprietaria = this.cedolare.calcola(incassoConIva);
+        return tasseProprietaria + this.calcolaTasseForfettario(compensoPm);
+    }
+
+    calcolaScenario4(pct) {
+        const compensoPm = this.incassoLordo * pct;
+        const baseImponibile = this.incassoLordo * 0.95;
+        const tasseProprietaria = this.irpef.calcola(baseImponibile);
+        return tasseProprietaria + this.calcolaTasseForfettario(compensoPm);
+    }
+
     /**
-     * Per una data percentuale di compenso PM, calcola il carico fiscale
-     * familiare sia in regime IRPEF (madre) che Cedolare Secca (madre).
+     * Per una data %, restituisce le tasse totali famiglia per ogni scenario.
      */
     calcolaPerPercentuale(percentualePm) {
-        const compensoPm = this.incassoLordo * percentualePm;
-        const imponibileForfettario = compensoPm * this.coeffRedditivita;
-        const impostaFiglio = imponibileForfettario * this.aliquotaForfettario;
-        const inpsFiglio = imponibileForfettario * this.aliquotaInps;
-        const tasseFiglio = impostaFiglio + inpsFiglio;
-
-        // Opzione A: Madre in IRPEF (può dedurre compenso + spese)
-        const imponibileMadreIrpef = Math.max(0, this.incassoLordo - compensoPm - this.speseVive);
-        const tasseMadreIrpef = this.irpef.calcola(imponibileMadreIrpef);
-        const totaleIrpef = tasseMadreIrpef + tasseFiglio;
-
-        // Opzione B: Madre in Cedolare Secca (nessuna deduzione)
-        const tasseMadreCedolare = this.cedolare.calcola(this.incassoLordo);
-        const totaleCedolare = tasseMadreCedolare + tasseFiglio;
-
         return {
             percentuale: percentualePm,
-            compensoPm,
-            totaleIrpef,
-            totaleCedolare,
-            differenza: totaleCedolare - totaleIrpef,
-            irpefConveniente: totaleIrpef < totaleCedolare,
+            totaleSrl: this.calcolaScenario1(percentualePm),
+            totaleSublocazione: this.calcolaScenario2(percentualePm),
+            totaleCedolareMandato: this.calcolaScenario3(percentualePm),
+            totalePersonaFisica: this.calcolaScenario4(percentualePm),
         };
     }
 
     /**
-     * Genera i dati per il grafico break-even dal 0% al 100%.
+     * Genera i dati per il grafico dal 0% al 100%.
      */
     generaDatiGrafico(stepPercentuale = 0.01) {
         const dati = [];
@@ -59,24 +84,16 @@ class BreakevenCalculator {
     }
 
     /**
-     * Trova la percentuale di break-even (dove IRPEF = Cedolare).
+     * Trova lo scenario più conveniente per una data percentuale.
      */
-    trovaBreakeven() {
-        const dati = this.generaDatiGrafico(0.001);
-        let breakeven = null;
-
-        for (let i = 1; i < dati.length; i++) {
-            const prev = dati[i - 1];
-            const curr = dati[i];
-
-            if (prev.differenza <= 0 && curr.differenza > 0) {
-                // Interpolazione lineare
-                const ratio = Math.abs(prev.differenza) / (Math.abs(prev.differenza) + Math.abs(curr.differenza));
-                breakeven = prev.percentuale + ratio * (curr.percentuale - prev.percentuale);
-                break;
-            }
-        }
-
-        return breakeven !== null ? Math.round(breakeven * 10000) / 100 : null;
+    trovaMigliore(percentualePm) {
+        const d = this.calcolaPerPercentuale(percentualePm);
+        const scenari = [
+            { nome: 'Scenario 1 (SRL)', tasse: d.totaleSrl },
+            { nome: 'Scenario 2 (Sublocazione)', tasse: d.totaleSublocazione },
+            { nome: 'Scenario 3 (Cedolare+Mandato)', tasse: d.totaleCedolareMandato },
+            { nome: 'Scenario 4 (Persona Fisica)', tasse: d.totalePersonaFisica },
+        ];
+        return scenari.reduce((best, s) => s.tasse < best.tasse ? s : best);
     }
 }
