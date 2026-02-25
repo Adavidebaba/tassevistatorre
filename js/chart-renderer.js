@@ -10,11 +10,13 @@ class ScenariChart {
         this.ctx = this.canvas.getContext('2d');
         this.padding = { top: 40, right: 30, bottom: 75, left: 75 };
 
+        // Palette colorblind-safe (Wong, Nature Methods 2011)
+        // Distinguibili con deuteranopia, protanopia e tritanopia
         this.linee = [
-            { campo: 'totaleSrl', colore: '#6366f1', label: 'S1 — SRL + Forfettario' },
-            { campo: 'totaleSublocazione', colore: '#f97316', label: 'S2 — Sublocazione (Cedolare+IRPEF)' },
-            { campo: 'totaleCedolareMandato', colore: '#22c55e', label: 'S3 — Cedolare + Forfettario' },
-            { campo: 'totalePersonaFisica', colore: '#ef4444', label: 'S4 — Persona Fisica + Forfettario' },
+            { campo: 'totaleSrl', colore: '#0072B2', label: 'S1 — SRL + Forfettario' },
+            { campo: 'totaleSublocazione', colore: '#E69F00', label: 'S2 — Sublocazione (Cedolare+IRPEF)' },
+            { campo: 'totaleCedolareMandato', colore: '#009E73', label: 'S3 — Cedolare + Forfettario' },
+            { campo: 'totalePersonaFisica', colore: '#CC79A7', label: 'S4 — Persona Fisica + Forfettario' },
         ];
     }
 
