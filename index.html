@@ -77,9 +77,16 @@
     <!-- ─── Scenario Cards ─────────────────────────────────────── -->
     <div class="scenarios-grid" id="scenari-container"></div>
 
-    <!-- ─── Grafico Break-Even ─────────────────────────────────── -->
     <section class="glass-card">
-      <h2>📈 Confronto Tasse Famiglia — 4 Scenari</h2>
+      <div
+        style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:8px;">
+        <h2 style="margin:0;">📈 Confronto Scenari — 4 Viste</h2>
+        <div id="chart-toggle"
+          style="display:flex; gap:4px; background:rgba(255,255,255,0.06); border-radius:8px; padding:3px;">
+          <button class="chart-toggle-btn active" data-vista="tasse">💰 Tasse Famiglia</button>
+          <button class="chart-toggle-btn" data-vista="nettoAffittuario">🧑‍💼 Netto Affittuario</button>
+        </div>
+      </div>
       <div class="chart-container">
         <canvas id="breakeven-canvas"></canvas>
       </div>

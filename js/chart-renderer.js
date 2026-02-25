@@ -1,7 +1,7 @@
 /**
  * chart-renderer.js
- * Grafico comparativo Canvas: tasse totali famiglia per 4 scenari
- * al variare della % di compenso PM.
+ * Grafico comparativo Canvas: tasse totali famiglia o netto affittuario
+ * per 4 scenari al variare della % di compenso PM.
  */
 
 class ScenariChart {
@@ -9,28 +9,60 @@ class ScenariChart {
         this.canvas = document.getElementById(canvasId);
         this.ctx = this.canvas.getContext('2d');
         this.padding = { top: 40, right: 30, bottom: 75, left: 75 };
+        this.datiCorrente = null;
+        this.vistaCorrente = 'tasse';
 
         // Palette senza rosso e senza verde — safe per daltonismo
-        this.linee = [
-            { campo: 'totaleSrl', colore: '#0072B2', label: 'S1 — SRL + Forfettario' },
-            { campo: 'totaleSublocazione', colore: '#E69F00', label: 'S2 — Sublocazione (Cedolare+IRPEF)' },
-            { campo: 'totaleCedolareMandato', colore: '#8B5CF6', label: 'S3 — Cedolare + Forfettario' },
-            { campo: 'totalePersonaFisica', colore: '#FACC15', label: 'S4 — Persona Fisica + Forfettario' },
+        this.colori = [
+            { colore: '#0072B2', label: 'S1 — SRL + Forfettario' },
+            { colore: '#E69F00', label: 'S2 — Sublocazione (Cedolare+IRPEF)' },
+            { colore: '#8B5CF6', label: 'S3 — Cedolare + Forfettario' },
+            { colore: '#FACC15', label: 'S4 — Persona Fisica + Forfettario' },
         ];
+
+        this.viste = {
+            tasse: {
+                campi: ['totaleSrl', 'totaleSublocazione', 'totaleCedolareMandato', 'totalePersonaFisica'],
+                titoloAsse: 'Tasse Totali Famiglia (€)',
+            },
+            nettoAffittuario: {
+                campi: ['nettoAffSrl', 'nettoAffSublocazione', 'nettoAffCedolareMandato', 'nettoAffPersonaFisica'],
+                titoloAsse: 'Netto Affittuario (€)',
+            },
+        };
+    }
+
+    getLineeCorrente() {
+        const vista = this.viste[this.vistaCorrente];
+        return vista.campi.map((campo, i) => ({
+            campo,
+            colore: this.colori[i].colore,
+            label: this.colori[i].label,
+        }));
+    }
+
+    setVista(vista) {
+        this.vistaCorrente = vista;
+        if (this.datiCorrente) {
+            this.disegna(this.datiCorrente);
+        }
     }
 
     disegna(datiGrafico) {
+        this.datiCorrente = datiGrafico;
+        const linee = this.getLineeCorrente();
+
         this.setupCanvas();
         const { width, height } = this.getAreaDisegno();
-        const { minY, maxY, rangeY } = this.calcolaRange(datiGrafico);
+        const { minY, maxY, rangeY } = this.calcolaRange(datiGrafico, linee);
 
         this.disegnaGriglia(width, height, minY, maxY);
 
-        this.linee.forEach(linea => {
+        linee.forEach(linea => {
             this.disegnaLinea(datiGrafico, linea.campo, linea.colore, width, height, minY, rangeY);
         });
 
-        this.disegnaLegenda(width);
+        this.disegnaLegenda(width, linee);
     }
 
     setupCanvas() {
@@ -52,10 +84,10 @@ class ScenariChart {
         };
     }
 
-    calcolaRange(dati) {
+    calcolaRange(dati, linee) {
         let min = Infinity;
         let max = 0;
-        const campi = this.linee.map(l => l.campo);
+        const campi = linee.map(l => l.campo);
         dati.forEach(d => {
             campi.forEach(c => {
                 min = Math.min(min, d[c]);
@@ -133,14 +165,14 @@ class ScenariChart {
         ctx.fill();
     }
 
-    disegnaLegenda(w) {
+    disegnaLegenda(w, linee) {
         const ctx = this.ctx;
         const itemWidth = w / 2;
         const baseX = this.padding.left;
         const baseY = this.displayHeight - 28;
         const rowHeight = 18;
 
-        this.linee.forEach((item, i) => {
+        linee.forEach((item, i) => {
             const col = i % 2;
             const row = Math.floor(i / 2);
             const x = baseX + col * itemWidth;

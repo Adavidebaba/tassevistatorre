@@ -36,6 +36,15 @@ class DashboardApp {
         });
 
         window.addEventListener('resize', () => this.disegnaGrafico());
+
+        // Toggle vista grafico
+        document.querySelectorAll('.chart-toggle-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.chart-toggle-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                this.chart.setVista(btn.dataset.vista);
+            });
+        });
     }
 
     leggiParametri() {

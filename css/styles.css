@@ -405,6 +405,31 @@ body::before {
   font-size: 1.2rem;
 }
 
+/* ─── Chart Toggle Buttons ─────────────────────────────────────────── */
+.chart-toggle-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-family: var(--font-main);
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 0.4rem 0.9rem;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.chart-toggle-btn:hover {
+  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.chart-toggle-btn.active {
+  background: var(--accent-blue);
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.35);
+}
+
 /* ─── Responsive ───────────────────────────────────────────────────── */
 @media (max-width: 900px) {
   .scenarios-grid {

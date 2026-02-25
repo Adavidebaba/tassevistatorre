@@ -10,7 +10,8 @@ class BreakevenCalculator {
         this.speseVive = params.speseVive || 15000;
         this.aliquotaForfettario = params.aliquotaForfettario || 0.05;
         this.coeffRedditivita = 0.86;
-        this.aliquotaInps = 0.2607;
+        this.aliquotaInpsGestSep = 0.2607;
+        this.aliquotaInpsComm = 0.2448;
         this.ivaIncasso = 0.10;
         this.ivaSpese = 0.22;
 
@@ -22,15 +23,21 @@ class BreakevenCalculator {
     calcolaTasseForfettario(compensoPm) {
         const imponibile = compensoPm * this.coeffRedditivita;
         const imposta = imponibile * this.aliquotaForfettario;
-        const inps = imponibile * this.aliquotaInps;
+        const inps = imponibile * this.aliquotaInpsGestSep;
         return imposta + inps;
+    }
+
+    nettoForfettario(compensoPm) {
+        return compensoPm - this.calcolaTasseForfettario(compensoPm);
     }
 
     calcolaScenario1(pct) {
         const compensoPm = this.incassoLordo * pct;
         const imponibileSrl = Math.max(0, this.incassoLordo - compensoPm - this.speseVive);
         const srl = this.srl.calcola(imponibileSrl);
-        return srl.tasseTotali + this.calcolaTasseForfettario(compensoPm);
+        const tasse = srl.tasseTotali + this.calcolaTasseForfettario(compensoPm);
+        const nettoAff = this.nettoForfettario(compensoPm);
+        return { tasse, nettoAff };
     }
 
     calcolaScenario2(pct) {
@@ -40,34 +47,48 @@ class BreakevenCalculator {
         const tasseProprietaria = canone * 0.21;
         const imponibileAff = Math.max(0, incassoConIva - canone - speseConIva);
         const tasseAffIrpef = this.irpef.calcola(imponibileAff);
-        const inpsAff = Math.round(imponibileAff * this.aliquotaInps * 100) / 100;
-        return tasseProprietaria + tasseAffIrpef + inpsAff;
+        const inpsAff = Math.round(imponibileAff * this.aliquotaInpsComm * 100) / 100;
+        const tasse = tasseProprietaria + tasseAffIrpef + inpsAff;
+        const nettoAff = incassoConIva - canone - speseConIva - tasseAffIrpef - inpsAff;
+        return { tasse, nettoAff };
     }
 
     calcolaScenario3(pct) {
         const compensoPm = this.incassoLordo * pct;
         const incassoConIva = this.incassoLordo * (1 + this.ivaIncasso);
         const tasseProprietaria = this.cedolare.calcola(incassoConIva);
-        return tasseProprietaria + this.calcolaTasseForfettario(compensoPm);
+        const tasse = tasseProprietaria + this.calcolaTasseForfettario(compensoPm);
+        const nettoAff = this.nettoForfettario(compensoPm);
+        return { tasse, nettoAff };
     }
 
     calcolaScenario4(pct) {
         const compensoPm = this.incassoLordo * pct;
         const baseImponibile = this.incassoLordo * 0.95;
         const tasseProprietaria = this.irpef.calcola(baseImponibile);
-        return tasseProprietaria + this.calcolaTasseForfettario(compensoPm);
+        const tasse = tasseProprietaria + this.calcolaTasseForfettario(compensoPm);
+        const nettoAff = this.nettoForfettario(compensoPm);
+        return { tasse, nettoAff };
     }
 
     /**
-     * Per una data %, restituisce le tasse totali famiglia per ogni scenario.
+     * Per una data %, restituisce tasse e netto affittuario per ogni scenario.
      */
     calcolaPerPercentuale(percentualePm) {
+        const s1 = this.calcolaScenario1(percentualePm);
+        const s2 = this.calcolaScenario2(percentualePm);
+        const s3 = this.calcolaScenario3(percentualePm);
+        const s4 = this.calcolaScenario4(percentualePm);
         return {
             percentuale: percentualePm,
-            totaleSrl: this.calcolaScenario1(percentualePm),
-            totaleSublocazione: this.calcolaScenario2(percentualePm),
-            totaleCedolareMandato: this.calcolaScenario3(percentualePm),
-            totalePersonaFisica: this.calcolaScenario4(percentualePm),
+            totaleSrl: s1.tasse,
+            totaleSublocazione: s2.tasse,
+            totaleCedolareMandato: s3.tasse,
+            totalePersonaFisica: s4.tasse,
+            nettoAffSrl: s1.nettoAff,
+            nettoAffSublocazione: s2.nettoAff,
+            nettoAffCedolareMandato: s3.nettoAff,
+            nettoAffPersonaFisica: s4.nettoAff,
         };
     }
 
