@@ -175,16 +175,16 @@ describe('ScenarioEngine — nettoProprietariaTarget = 24000', () => {
             expect(s.affittuario.imposta).toBeCloseTo(28467.71, 2);
         });
 
-        it('affittuario: INPS ≈ 21721.59', () => {
-            expect(s.affittuario.inps).toBeCloseTo(21721.59, 2);
+        it('affittuario: INPS ≈ 20396.80 (Gestione Commercianti 24.48%)', () => {
+            expect(s.affittuario.inps).toBeCloseTo(20396.80, 2);
         });
 
-        it('affittuario: netto ≈ 33130.95', () => {
-            expect(s.affittuario.netto).toBeCloseTo(33130.95, 0);
+        it('affittuario: netto ≈ 34455.74', () => {
+            expect(s.affittuario.netto).toBeCloseTo(34455.74, 0);
         });
 
-        it('netto famiglia ≈ 57130.95', () => {
-            expect(s.nettoFamiglia).toBeCloseTo(57130.95, 0);
+        it('netto famiglia ≈ 58455.74', () => {
+            expect(s.nettoFamiglia).toBeCloseTo(58455.74, 0);
         });
 
         it('verifica algebrica: netto proprietaria + netto affittuario = netto famiglia', () => {

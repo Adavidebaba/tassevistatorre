@@ -217,7 +217,8 @@ class ScenarioEngine {
     // Affittuario incassa lordo+IVA: FUORI dal forfettario → Regime Semplificato IRPEF
     const imponibileAffittuario = Math.max(0, incassoConIva - canone - speseConIva);
     const tasseAffittuario = this.irpef.calcola(imponibileAffittuario);
-    const inpsAffittuario = Math.round(imponibileAffittuario * 0.2607 * 100) / 100;
+    const aliquotaInpsCommercianti = 0.2448;
+    const inpsAffittuario = Math.round(imponibileAffittuario * aliquotaInpsCommercianti * 100) / 100;
 
     const tasseTotaliFamiglia = tasseProprietaria + tasseAffittuario + inpsAffittuario;
     const nettoProprietaria = canone - tasseProprietaria;

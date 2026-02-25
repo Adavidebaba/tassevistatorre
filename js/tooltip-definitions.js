@@ -89,11 +89,20 @@ const TOOLTIP_AFFITTUARIO = {
     },
     inps: {
         forfettario: 'CONTRIBUTI INPS (GESTIONE SEPARATA)\n' +
-            'Calcolo: Imponibile Forfettario × 26,07%.\n' +
-            'Contributi previdenziali obbligatori calcolati sull\'imponibile forfettario. Sono un costo aggiuntivo oltre all\'imposta sostitutiva.',
-        semplificato: 'CONTRIBUTI INPS (GESTIONE SEPARATA)\n' +
-            'Calcolo: Imponibile × 26,07%.\n' +
-            'Contributi previdenziali obbligatori. In regime semplificato si calcolano sull\'imponibile effettivo (ricavi − costi).',
+            'Calcolo: Imponibile Forfettario × 26,07% (25% IVS + 1,07% tutele).\n\n' +
+            'Il Property Manager (ATECO 68.32.00) è un libero professionista senza cassa dedicata → iscritto alla Gestione Separata INPS.\n\n' +
+            'Differenze rispetto alla Gestione Commercianti:\n' +
+            '• Nessun contributo fisso minimo (si paga solo sul reddito effettivo)\n' +
+            '• NON esiste la riduzione del 35% (riservata solo a Commercianti/Artigiani forfettari)\n' +
+            '• I contributi sono un costo aggiuntivo oltre all\'imposta sostitutiva.',
+        semplificato: 'CONTRIBUTI INPS (GESTIONE COMMERCIANTI)\n' +
+            'Calcolo: Imponibile × 24,48% (24% base + 0,48% indennizzo cessazione attività).\n\n' +
+            'La sublocazione turistica è attività d\'impresa → iscrizione alla Gestione Commercianti INPS (non Gestione Separata).\n\n' +
+            'Gestione Commercianti prevede:\n' +
+            '• Contributo fisso minimo: ~4.611 €/anno (su reddito minimale 18.808 €), dovuto anche se il reddito è inferiore\n' +
+            '• Aliquota 24,48% fino a 56.224 €, poi 25,48% sull\'eccedenza\n' +
+            '• Riduzione 35%: disponibile SOLO per chi è nel Regime Forfettario\n\n' +
+            'In questo scenario l\'affittuario supera 85.000 € di ricavi → esce dal Forfettario → NON può beneficiare della riduzione 35%.',
     },
     totaleTasse: 'TOTALE ONERI FISCALI FIGLIO\n' +
         'Calcolo: Imposta (sostitutiva o IRPEF) + Contributi INPS.\n' +
